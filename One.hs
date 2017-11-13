@@ -49,3 +49,26 @@ lexit input =
 
 ex3 = "2*((var_1 + x') + 11)"
 ex4 = "if (*p1-- == *p2++) then f() else g()"
+
+
+parseExpression :: [String] -> (Expression, [String])
+parseExpression input =
+  let (exp1, tok1) = parseProduct input
+  in case tok1 of "+":xs -> let (exp2, tok2) = parseExpression xs in ((Add exp1 exp2), tok2)
+                  _ -> (exp1, tok1)
+
+
+parseProduct input =
+  let (exp1, tok1) = parseAtom input
+  in case tok1 of "*":xs -> let (exp2, tok2) = parseProduct xs in ((Mul exp1 exp2), tok2)
+                  _ -> (exp1, tok1)
+
+
+parseAtom [] = error "Expected an expression at end of input"
+parseAtom ("(":xs) = let out = parseExpression xs
+                   in case out of (x, ")":tok) -> (x, tok)
+                                  x -> error "Expected closing bracket"
+parseAtom (x:xs)
+  | numeric (head x) = (Const(read x :: Int), xs)
+  | otherwise = (Var(x),xs)
+
