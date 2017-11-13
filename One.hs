@@ -1,7 +1,8 @@
 data Expression = Var String
   | Const Int
   | Add Expression Expression
-  | Mul Expression Expression deriving(Show)
+  | Mul Expression Expression
+
 
 ex1 = Add (Mul (Const 2) (Var "x")) (Var "y")
 
@@ -71,4 +72,25 @@ parseAtom ("(":xs) = let out = parseExpression xs
 parseAtom (x:xs)
   | numeric (head x) = (Const(read x :: Int), xs)
   | otherwise = (Var(x),xs)
+
+
+makeParser parseFn s =
+  let (expr, rest) = (parseFn (lexit s)) in
+    if rest /= [] then error "Unparsed input"
+    else expr
+
+defaultParser = makeParser parseExpression
+
+ex5 = "x + 1"
+ex6 = "(x1 + x2 + x3) * (1+2+3*x+ y)"
+
+stringOfExp (Var x) = x
+stringOfExp (Const x) = show x
+stringOfExp (Add x y) = "(" ++ (stringOfExp x) ++ "+" ++ (stringOfExp y) ++ ")"
+stringOfExp (Mul x y) = "(" ++ (stringOfExp x) ++ "*" ++ (stringOfExp y) ++ ")"
+
+ex7 = defaultParser "x + 3 * y"
+
+instance Show Expression where
+     show x = stringOfExp x
 
